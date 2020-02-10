@@ -38,14 +38,14 @@ def get_domainAliases():
         print(aliasArray)
 
 def get_configfiles():
-        """"
+        """
         ###########################################################################################
         ###########################################################################################
         # We need to get all config files so it's more dynamic
         # Currently only takes two files, one for Vhosts and one for SSL HOSTS
         ###########################################################################################
         ###########################################################################################
-        """"
+        """
         configArray=''
         try:
                 print(len(configArray))
@@ -84,14 +84,14 @@ def createSSLHostEntry(primaryDomain, aliasArray):
                 ### ACCEPT VHOST FILE LOCATION ###
         ### /TODO ###
 
-        """"
+        """
         try:
-               
-                SSlString = "\n <VirtualHost *:443> \n ServerName " + primaryDomain + "\n DocumentRoot /var/www/html/"+ primaryDomain +"\n ErrorLog /var/log/apache/" + primaryDomain + "-error_log \n TransferLog /var/log/apache" + primaryDomain + "-access_log \n SSLProxyEngine On \n SSLCertificateFile /etc/letsencrypt/live/" + primaryDomain + "/fullchain.pem \n SSLCertificateKeyFile /etc/letsencrypt/live/" + primaryDomain + "/privkey.pem \n SSLCipherSuite EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH+aRSA !RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS \n</VirtualHost> \n"
+                DocumentRoot="/var/www/html/" + primaryDomain
+                SSlString = "\n <VirtualHost *:443> \n ServerName " + primaryDomain + "\n DocumentRoot "+ DocumentRoot +"\n ErrorLog /var/log/apache/" + primaryDomain + "-error_log \n TransferLog /var/log/apache" + primaryDomain + "-access_log \n SSLProxyEngine On \n SSLCertificateFile /etc/letsencrypt/live/" + primaryDomain + "/fullchain.pem \n SSLCertificateKeyFile /etc/letsencrypt/live/" + primaryDomain + "/privkey.pem \n SSLCipherSuite EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH+aRSA !RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS \n</VirtualHost> \n"
                 print(SSlString)
                 vhostFile = open('SSLHosts.conf', "a+")
                 vhostFile.write(SSlString)
-        
+                return DocumentRoot
         except exception as error:
                 print(error)
 def checkapacheconfig(configfile1):
@@ -146,7 +146,7 @@ def delete_line_by_full_match(original_file, line_to_delete):
     else:
         os.remove(dummy_file)
 def checkDocumentRoot(DocumentRoot):
-                """"
+        """
         ###########################################################################################
         ###########################################################################################
         # 1. Get Document roots
@@ -156,7 +156,7 @@ def checkDocumentRoot(DocumentRoot):
         1. Call other function to create users and permissions for fpm
         ###########################################################################################
         ############################
-                """
+        """
         if path.exists(DocumentRoot):
                 if (path.isdir(DocumentRoot)):
                         print("Document Root already Exists")
@@ -166,15 +166,17 @@ def checkDocumentRoot(DocumentRoot):
                         os.mkdir(DocumentRoot)
                         print("Directory is now created ")
         else:
-                os.rename(DocumentRoot, DocumentRoot + ".bak")
                 os.mkdir(DocumentRoot)
                 print("created the Document root")
+
+
+
 if __name__ == "__main__":
     primaryDomain=get_primaryDomain()
     aliasArray=get_domainAliases()
     config1, config2=configFiles=get_configfiles()
     createVhostEntry(primaryDomain, aliasArray)
-    createSSLHostEntry(primaryDomain, aliasArray)
+    DocumentRoot=createSSLHostEntry(primaryDomain, aliasArray)
     checkDocumentRoot(DocumentRoot)
     checkapacheconfig(configfile1="Vhosts.conf")
     checkapacheconfig(configfile1="SSLHosts.conf")
